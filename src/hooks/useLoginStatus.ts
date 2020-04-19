@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 import { STORAGE_KEY_AUTH_TOKEN } from "../common/const";
 
@@ -20,7 +20,7 @@ export const useLoginStatus = () => {
     setIsLogin(loginStatus);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.addEventListener("storage", onStorageChange);
     return () => {
       window.removeEventListener("storage", onStorageChange);

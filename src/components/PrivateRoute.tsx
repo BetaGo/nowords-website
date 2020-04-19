@@ -4,7 +4,7 @@ import { useLoginStatus } from "../hooks/useLoginStatus";
 
 const PrivateRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
   const isLogin = useLoginStatus();
-
+  console.log("isLogin", isLogin);
   return (
     <Route
       {...rest}
@@ -14,8 +14,8 @@ const PrivateRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
         ) : (
           <Redirect
             to={{
-              pathname: "/login",
-              state: { from: location }
+              pathname: "/user/login",
+              state: { from: location },
             }}
           />
         )

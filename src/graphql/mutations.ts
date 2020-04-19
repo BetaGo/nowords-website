@@ -7,3 +7,14 @@ export const ADD_NEW_WORD = gql`
     }
   }
 `;
+
+export const ADD_USER = gql`
+  mutation AddUser($input: AddUserInput) {
+    addUser(input: $input) {
+      id
+      accessToken
+      refreshToken
+    }
+  }
+`;
+

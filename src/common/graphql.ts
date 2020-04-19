@@ -2,21 +2,22 @@ import ApolloClient from "apollo-boost";
 import jwtDecode from "jwt-decode";
 
 import { STORAGE_KEY_AUTH_TOKEN } from "./const";
+import { EE } from "./events";
 
 import {
   RefreshToken,
-  RefreshTokenVariables
+  RefreshTokenVariables,
 } from "../graphql/__generated__/RefreshToken";
 import { REFRESH_TOKEN } from "../graphql/queries";
 import { IJwtTokenObj, IAuthToken } from "../types";
 
 export const client = new ApolloClient({
-  uri: process.env.REACT_APP_GRAPHQL_HTTP_URI
+  uri: process.env.REACT_APP_GRAPHQL_HTTP_URI,
 });
 
 export const authorizedClient = new ApolloClient({
   uri: process.env.REACT_APP_GRAPHQL_HTTP_URI,
-  request: async operation => {
+  request: async (operation) => {
     const tokensStr = localStorage.getItem(STORAGE_KEY_AUTH_TOKEN);
 
     let accessToken: string | undefined;
@@ -43,9 +44,9 @@ export const authorizedClient = new ApolloClient({
           variables: {
             input: {
               accessToken,
-              refreshToken
-            }
-          }
+              refreshToken,
+            },
+          },
         });
         localStorage.setItem(
           STORAGE_KEY_AUTH_TOKEN,
@@ -56,8 +57,30 @@ export const authorizedClient = new ApolloClient({
 
     operation.setContext({
       headers: {
-        authorization: accessToken ? `Bearer ${accessToken}` : ""
-      }
+        authorization: accessToken ? `Bearer ${accessToken}` : "",
+      },
     });
-  }
+  },
+  onError: ({ graphQLErrors, networkError }) => {
+    if (networkError) {
+      EE.emit("notistack", "网络有问题，请稍后再试。", {
+        variant: "error",
+      });
+      return;
+    }
+    if (graphQLErrors) {
+      const tipsMessage = graphQLErrors.find(
+        (v) => v.extensions?.code === "TIPS_ERROR"
+      );
+      if (tipsMessage) {
+        EE.emit("notistack", tipsMessage.message, {
+          variant: "error",
+        });
+        return;
+      }
+    }
+    EE.emit("notistack", "服务器出了点问题，请稍后再试。", {
+      variant: "error",
+    });
+  },
 });

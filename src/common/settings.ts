@@ -23,8 +23,8 @@ export class Settings {
   private readonly _changeEventName = "settingsChange";
 
   private constructor() {
-    this.loadSettings();
     this._EE = new EventEmitter();
+    this.loadSettings();
     window.addEventListener("storage", this.loadSettings);
   }
 
@@ -36,7 +36,7 @@ export class Settings {
     return Settings.instance;
   }
 
-  async loadSettings() {
+  loadSettings = () => {
     const settingsStr = localStorage.getItem(STORAGE_SETTINGS) || "";
     try {
       const parsedSettings = JSON.parse(settingsStr);
@@ -49,7 +49,7 @@ export class Settings {
     }
     this._EE.emit(this._changeEventName, _.cloneDeep(this._settings));
     return settingsStr;
-  }
+  };
 
   get<K extends keyof ISettingsConfig>(
     key: K,
