@@ -7,12 +7,15 @@ import {
   Snackbar,
   Typography,
 } from "@material-ui/core";
-import Alert from "@material-ui/lab/Alert";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import GitHubIcon from "@material-ui/icons/GitHub";
+import Alert from "@material-ui/lab/Alert";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { FaWeibo } from "react-icons/fa";
+import { useHistory } from "react-router-dom";
+import { useSearchParam } from "react-use";
 import * as yup from "yup";
 
 import { UserLoginInput } from "../../../__generated__/globalTypes";
@@ -25,7 +28,6 @@ import {
   UserLoginVariables,
 } from "../../graphql/__generated__/UserLogin";
 import { LOGIN_TOKEN, USER_LOGIN } from "../../graphql/queries";
-import { useHistory } from "react-router-dom";
 
 type ILoginMessage = {
   show: boolean;
@@ -36,7 +38,9 @@ const thirdPartLogin = (type: string) => {
   window.location.replace(
     `${
       process.env.REACT_APP_AUTH_URL
-    }?type=${type}&redirectUrl=${encodeURIComponent(window.location.href)}`
+    }?type=${type}&redirectUrl=${encodeURIComponent(
+      window.location.origin + window.location.pathname
+    )}`
   );
 };
 
@@ -83,13 +87,25 @@ const LoginForm = () => {
   });
 
   const history = useHistory();
+  const accessTokenParam = useSearchParam("accessToken");
+  const refreshTokenParam = useSearchParam("refreshToken");
 
   useEffect(() => {
     if (data?.userLogin) {
       storeAuthToken(data.userLogin);
       history.push("/home");
     }
-  }, [data]);
+  }, [data, history]);
+
+  useEffect(() => {
+    if (accessTokenParam && refreshTokenParam) {
+      storeAuthToken({
+        accessToken: accessTokenParam,
+        refreshToken: refreshTokenParam,
+      });
+      history.push("/home");
+    }
+  }, [accessTokenParam, refreshTokenParam, history]);
 
   const onSubmit = async (data: UserLoginInput) => {
     const tokenRes = await client.query<LoginToken>({
@@ -185,6 +201,9 @@ const LoginForm = () => {
       <div>
         <IconButton onClick={() => thirdPartLogin("github")}>
           <GitHubIcon />
+        </IconButton>
+        <IconButton onClick={() => thirdPartLogin("weibo")}>
+          <FaWeibo />
         </IconButton>
       </div>
       <Snackbar
