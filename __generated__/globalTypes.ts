@@ -9,8 +9,8 @@
 
 export interface AddUserInput {
   username: string;
-  displayName: string;
   password: string;
+  displayName: string;
   email?: string | null;
   avatar?: string | null;
   phone?: string | null;
@@ -23,8 +23,8 @@ export interface AddUserWordInput {
 }
 
 export interface RefreshTokenInput {
-  refreshToken: string;
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface UserLoginInput {

@@ -22,12 +22,12 @@ import { UserLoginInput } from "../../../__generated__/globalTypes";
 import { Encrypt } from "../../common/encrypt";
 import { client } from "../../common/graphql";
 import { storeAuthToken } from "../../common/utils";
-import { LoginToken } from "../../graphql/__generated__/LoginToken";
+import { EncryptToken } from "../../graphql/__generated__/EncryptToken";
 import {
   UserLogin,
   UserLoginVariables,
 } from "../../graphql/__generated__/UserLogin";
-import { LOGIN_TOKEN, USER_LOGIN } from "../../graphql/queries";
+import { ENCRYPT_TOKEN, USER_LOGIN } from "../../graphql/queries";
 
 type ILoginMessage = {
   show: boolean;
@@ -108,17 +108,17 @@ const LoginForm = () => {
   }, [accessTokenParam, refreshTokenParam, history]);
 
   const onSubmit = async (data: UserLoginInput) => {
-    const tokenRes = await client.query<LoginToken>({
-      query: LOGIN_TOKEN,
+    const tokenRes = await client.query<EncryptToken>({
+      query: ENCRYPT_TOKEN,
     });
-    if (!tokenRes.data.loginToken) {
+    if (!tokenRes.data.encryptToken) {
       return;
     }
     const encrypt = Encrypt.getInstance();
     const encryptedPassword = await encrypt.rsaEncrypt(
-      tokenRes.data.loginToken.publicKey,
+      tokenRes.data.encryptToken.publicKey,
       JSON.stringify({
-        token: tokenRes.data.loginToken.token,
+        token: tokenRes.data.encryptToken.token,
         text: data.password,
       })
     );

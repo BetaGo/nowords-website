@@ -10,16 +10,15 @@ import { AddUserInput } from "./../../../__generated__/globalTypes";
 // ====================================================
 
 export interface AddUser_addUser {
-  __typename: "AddUserPayload";
-  id: number;
+  __typename: "AuthorizationToken";
   accessToken: string;
   refreshToken: string;
 }
 
 export interface AddUser {
-  addUser: AddUser_addUser | null;
+  addUser: AddUser_addUser;
 }
 
 export interface AddUserVariables {
-  input?: AddUserInput | null;
+  input: AddUserInput;
 }

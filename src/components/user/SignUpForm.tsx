@@ -17,9 +17,9 @@ import { Encrypt } from "../../common/encrypt";
 import { client } from "../../common/graphql";
 import { storeAuthToken } from "../../common/utils";
 import { AddUser, AddUserVariables } from "../../graphql/__generated__/AddUser";
-import { LoginToken } from "../../graphql/__generated__/LoginToken";
+import { EncryptToken } from "../../graphql/__generated__/EncryptToken";
 import { ADD_USER } from "../../graphql/mutations";
-import { LOGIN_TOKEN } from "../../graphql/queries";
+import { ENCRYPT_TOKEN } from "../../graphql/queries";
 import { useHistory } from "react-router-dom";
 
 type ISignUpMessage = {
@@ -76,17 +76,17 @@ const SignUpForm: React.FC = () => {
   }, [data]);
 
   const onSubmit = async (values: AddUserInput) => {
-    const tokenRes = await client.query<LoginToken>({
-      query: LOGIN_TOKEN,
+    const tokenRes = await client.query<EncryptToken>({
+      query: ENCRYPT_TOKEN,
     });
-    if (!tokenRes.data.loginToken) {
+    if (!tokenRes.data.encryptToken) {
       return;
     }
     const encrypt = Encrypt.getInstance();
     const encryptedPassword = await encrypt.rsaEncrypt(
-      tokenRes.data.loginToken.publicKey,
+      tokenRes.data.encryptToken.publicKey,
       JSON.stringify({
-        token: tokenRes.data.loginToken.token,
+        token: tokenRes.data.encryptToken.token,
         text: values.password,
       })
     );
