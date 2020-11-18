@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 import { STORAGE_KEY_AUTH_TOKEN } from "../common/const";
 

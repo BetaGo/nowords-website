@@ -1,4 +1,5 @@
-import { useLazyQuery } from "@apollo/react-hooks";
+import { useLazyQuery } from "@apollo/client";
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Button,
   Divider,
@@ -71,7 +72,7 @@ const LoginSchema = yup.object().shape<UserLoginInput>({
 
 const LoginForm = () => {
   const { handleSubmit, control, errors } = useForm<UserLoginInput>({
-    validationSchema: LoginSchema,
+    resolver: yupResolver(LoginSchema),
   });
 
   const classes = useStyles();
@@ -110,6 +111,7 @@ const LoginForm = () => {
   const onSubmit = async (data: UserLoginInput) => {
     const tokenRes = await client.query<EncryptToken>({
       query: ENCRYPT_TOKEN,
+      fetchPolicy: "network-only",
     });
     if (!tokenRes.data.encryptToken) {
       return;

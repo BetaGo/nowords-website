@@ -27,6 +27,15 @@ export interface RefreshTokenInput {
   refreshToken: string;
 }
 
+export interface UpdateUserWordInput {
+  word?: string | null;
+  translation?: string | null;
+  example?: string | null;
+  id: number;
+  forgottenTimes?: number | null;
+  rememberTimes?: number | null;
+}
+
 export interface UserLoginInput {
   account: string;
   password: string;

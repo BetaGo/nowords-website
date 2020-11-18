@@ -1,4 +1,6 @@
-import ApolloClient from "apollo-boost";
+import { ApolloClient, from, HttpLink, InMemoryCache } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
 import jwtDecode from "jwt-decode";
 
 import { STORAGE_KEY_AUTH_TOKEN } from "./const";
@@ -13,62 +15,61 @@ import { IJwtTokenObj, IAuthToken } from "../types";
 
 export const client = new ApolloClient({
   uri: process.env.REACT_APP_GRAPHQL_HTTP_URI,
+  cache: new InMemoryCache(),
 });
 
-export const authorizedClient = new ApolloClient({
-  uri: process.env.REACT_APP_GRAPHQL_HTTP_URI,
-  request: async (operation) => {
-    const tokensStr = localStorage.getItem(STORAGE_KEY_AUTH_TOKEN);
+const asyncAuthLink = setContext(async () => {
+  const tokensStr = localStorage.getItem(STORAGE_KEY_AUTH_TOKEN);
 
-    let accessToken: string | undefined;
-    let refreshToken: string | undefined;
+  let accessToken: string | undefined;
+  let refreshToken: string | undefined;
 
-    if (tokensStr) {
-      try {
-        const tokens: IAuthToken = JSON.parse(tokensStr);
-        accessToken = tokens.accessToken;
-        refreshToken = tokens.refreshToken;
-      } catch (error) {
-        console.log(error);
-      }
+  if (tokensStr) {
+    try {
+      const tokens: IAuthToken = JSON.parse(tokensStr);
+      accessToken = tokens.accessToken;
+      refreshToken = tokens.refreshToken;
+    } catch (error) {
+      console.log(error);
     }
+  }
 
-    if (accessToken && refreshToken) {
-      const now = Math.floor(Date.now() / 1000);
-      const decodedAccessToken = jwtDecode<IJwtTokenObj>(accessToken);
-      const decodedRefreshToken = jwtDecode<IJwtTokenObj>(refreshToken);
+  if (accessToken && refreshToken) {
+    const now = Math.floor(Date.now() / 1000);
+    const decodedAccessToken = jwtDecode<IJwtTokenObj>(accessToken);
+    const decodedRefreshToken = jwtDecode<IJwtTokenObj>(refreshToken);
 
-      if (decodedAccessToken.exp < now && decodedRefreshToken.exp > now) {
-        const res = await client.query<RefreshToken, RefreshTokenVariables>({
-          query: REFRESH_TOKEN,
-          variables: {
-            input: {
-              accessToken,
-              refreshToken,
-            },
+    if (decodedAccessToken.exp < now && decodedRefreshToken.exp > now) {
+      const res = await client.query<RefreshToken, RefreshTokenVariables>({
+        query: REFRESH_TOKEN,
+        variables: {
+          input: {
+            accessToken,
+            refreshToken,
           },
-        });
-        localStorage.setItem(
-          STORAGE_KEY_AUTH_TOKEN,
-          JSON.stringify(res.data.refreshToken)
-        );
-      }
+        },
+      });
+      localStorage.setItem(
+        STORAGE_KEY_AUTH_TOKEN,
+        JSON.stringify(res.data.refreshToken)
+      );
     }
+  }
+  let c = {
+    headers: {
+      authorization: accessToken ? `Bearer ${accessToken}` : "",
+    },
+  };
+  return c;
+});
 
-    operation.setContext({
-      headers: {
-        authorization: accessToken ? `Bearer ${accessToken}` : "",
-      },
-    });
-  },
-  onError: ({ graphQLErrors, networkError }) => {
+const globalErrorCatch = onError(
+  ({ graphQLErrors, networkError, forward, operation }) => {
     if (networkError) {
       EE.emit("notistack", "网络有问题，请稍后再试。", {
         variant: "error",
       });
-      return;
-    }
-    if (graphQLErrors) {
+    } else if (graphQLErrors) {
       const tipsMessage = graphQLErrors.find(
         (v) => v.extensions?.code === "TIPS_ERROR"
       );
@@ -76,11 +77,20 @@ export const authorizedClient = new ApolloClient({
         EE.emit("notistack", tipsMessage.message, {
           variant: "error",
         });
-        return;
       }
+    } else {
+      EE.emit("notistack", "服务器出了点问题，请稍后再试。", {
+        variant: "error",
+      });
     }
-    EE.emit("notistack", "服务器出了点问题，请稍后再试。", {
-      variant: "error",
-    });
-  },
+    return forward(operation);
+  }
+);
+export const authorizedClient = new ApolloClient({
+  link: from([
+    asyncAuthLink,
+    globalErrorCatch,
+    new HttpLink({ uri: process.env.REACT_APP_GRAPHQL_HTTP_URI }),
+  ]),
+  cache: new InMemoryCache(),
 });

@@ -1,4 +1,5 @@
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation } from "@apollo/client";
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Button,
   Paper,
@@ -10,6 +11,7 @@ import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Alert from "@material-ui/lab/Alert";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
 import * as yup from "yup";
 
 import { AddUserInput } from "../../../__generated__/globalTypes";
@@ -20,7 +22,6 @@ import { AddUser, AddUserVariables } from "../../graphql/__generated__/AddUser";
 import { EncryptToken } from "../../graphql/__generated__/EncryptToken";
 import { ADD_USER } from "../../graphql/mutations";
 import { ENCRYPT_TOKEN } from "../../graphql/queries";
-import { useHistory } from "react-router-dom";
 
 type ISignUpMessage = {
   show: boolean;
@@ -52,14 +53,14 @@ const SignUpSchema = yup.object().shape<AddUserInput>({
   password: yup.string().required().max(32),
   displayName: yup.string().required().max(32),
   email: yup.string().email(),
-  phone: yup.string().required().max(32),
+  phone: yup.string().max(32),
 });
 
 const SignUpForm: React.FC = () => {
   const classes = useStyles();
   const history = useHistory();
   const { handleSubmit, control, errors } = useForm<AddUserInput>({
-    validationSchema: SignUpSchema,
+    resolver: yupResolver(SignUpSchema),
   });
   const [addUser, { data, loading }] = useMutation<AddUser, AddUserVariables>(
     ADD_USER
@@ -95,9 +96,13 @@ const SignUpForm: React.FC = () => {
       variables: {
         input: values,
       },
-    }).catch((e) => {
-      console.log(e);
-    });
+    })
+      .then((res) => {
+        history.replace("/");
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   return (
@@ -179,7 +184,6 @@ const SignUpForm: React.FC = () => {
           label="手机号"
           fullWidth
           variant="outlined"
-          // @ts-ignore
           control={control}
           defaultValue=""
           classes={{

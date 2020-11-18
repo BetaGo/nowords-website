@@ -1,4 +1,4 @@
-import { gql } from "apollo-boost";
+import { gql } from "@apollo/client";
 
 export const ADD_NEW_WORD = gql`
   mutation AddNewWord($input: AddUserWordInput!) {
@@ -13,6 +13,15 @@ export const ADD_USER = gql`
     addUser(input: $input) {
       accessToken
       refreshToken
+    }
+  }
+`;
+
+export const UPDATE_NEW_WORD = gql`
+  mutation UpdateNewWord($input: UpdateUserWordInput!) {
+    updateUserWord(input: $input) {
+      success
+      message
     }
   }
 `;
