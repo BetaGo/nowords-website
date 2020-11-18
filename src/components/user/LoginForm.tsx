@@ -94,7 +94,7 @@ const LoginForm = () => {
   useEffect(() => {
     if (data?.userLogin) {
       storeAuthToken(data.userLogin);
-      history.push("/home");
+      history.replace("/");
     }
   }, [data, history]);
 
@@ -104,7 +104,7 @@ const LoginForm = () => {
         accessToken: accessTokenParam,
         refreshToken: refreshTokenParam,
       });
-      history.push("/home");
+      window.location.href = window.location.origin;
     }
   }, [accessTokenParam, refreshTokenParam, history]);
 
