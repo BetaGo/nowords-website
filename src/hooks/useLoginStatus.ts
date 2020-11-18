@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from "react";
 
 import { STORAGE_KEY_AUTH_TOKEN } from "../common/const";
+import { authorizedClient } from "../common/graphql";
 
 const checkIsLogin = () => {
   const tokensStr = localStorage.getItem(STORAGE_KEY_AUTH_TOKEN);
@@ -20,6 +21,12 @@ export const useLoginStatus = () => {
     setIsLogin(loginStatus);
   };
 
+  const logout = () => {
+    localStorage.removeItem(STORAGE_KEY_AUTH_TOKEN);
+    authorizedClient.resetStore();
+    window.location.reload();
+  };
+
   useLayoutEffect(() => {
     window.addEventListener("storage", onStorageChange);
     return () => {
@@ -27,5 +34,5 @@ export const useLoginStatus = () => {
     };
   }, []);
 
-  return isLogin;
+  return { isLogin, logout };
 };

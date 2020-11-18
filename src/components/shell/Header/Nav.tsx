@@ -8,14 +8,24 @@ import SwipeableDrawer, {
   SwipeableDrawerProps,
 } from "@material-ui/core/SwipeableDrawer";
 import Typography from "@material-ui/core/Typography";
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import GTranslateIcon from "@material-ui/icons/GTranslate";
 import React from "react";
 import { useHistory } from "react-router-dom";
+
 import { User } from "../../../graphql/__generated__/User";
+import { useLoginStatus } from "../../../hooks/useLoginStatus";
 
 const useStyles = makeStyles((theme) => ({
   list: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
     width: 250,
+    height: "100%",
+  },
+  centerList: {
+    flex: 1,
   },
   large: {
     width: theme.spacing(8),
@@ -37,6 +47,7 @@ export interface INavProps extends SwipeableDrawerProps {
 const Nav: React.FC<INavProps> = (props) => {
   const classes = useStyles();
   let history = useHistory();
+  const { logout } = useLoginStatus();
 
   const handleClick = (path?: string) => (e: React.MouseEvent) => {
     if (path) {
@@ -61,12 +72,20 @@ const Nav: React.FC<INavProps> = (props) => {
           <Typography variant="body1">{user?.user?.displayName}</Typography>
           <Typography variant="body2">{user?.user?.email}</Typography>
         </div>
-        <List>
+        <List className={classes.centerList}>
           <ListItem button onClick={handleClick("/words")}>
             <ListItemIcon>
               <GTranslateIcon />
             </ListItemIcon>
             <ListItemText>记单词</ListItemText>
+          </ListItem>
+        </List>
+        <List>
+          <ListItem button onClick={logout}>
+            <ListItemIcon>
+              <ExitToAppIcon />
+            </ListItemIcon>
+            <ListItemText>退出登录</ListItemText>
           </ListItem>
         </List>
       </div>

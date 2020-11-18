@@ -3,7 +3,7 @@ import { Route, Redirect, RouteProps } from "react-router-dom";
 import { useLoginStatus } from "../hooks/useLoginStatus";
 
 const PrivateRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
-  const isLogin = useLoginStatus();
+  const { isLogin } = useLoginStatus();
   console.log("isLogin", isLogin);
   return (
     <Route

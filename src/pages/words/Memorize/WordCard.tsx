@@ -7,7 +7,7 @@ import React from "react";
 import { useDrag } from "react-dnd";
 
 import { NewWords_allNewWords_edges } from "../../../graphql/__generated__/NewWords";
-import { DND_WORD_CARD } from "../../../utils/const";
+import { DND_WORD_CARD } from "../../../common/const";
 import HiddenText from "./HiddenText";
 
 interface IWordCardProps {
@@ -22,17 +22,17 @@ const useStyles = makeStyles((theme: Theme) =>
       margin: "auto",
       overflow: "auto",
       height: "40vh",
-      width: "75vw"
-    }
+      width: "75vw",
+    },
   })
 );
 
-const WordCard: React.FC<IWordCardProps> = props => {
+const WordCard: React.FC<IWordCardProps> = (props) => {
   const { node } = props.data;
   const classes = useStyles();
   const [{ offset }, drag] = useDrag({
     item: { type: DND_WORD_CARD.CARD, id: node.id },
-    collect: monitor => {
+    collect: (monitor) => {
       const initialOffset = monitor.getInitialClientOffset();
       const currentOffset = monitor.getClientOffset();
       const dragItem = monitor.getItem();
@@ -47,8 +47,8 @@ const WordCard: React.FC<IWordCardProps> = props => {
           y:
             isDragCurrentItem && currentOffset && initialOffset
               ? currentOffset?.y - initialOffset?.y
-              : 0
-        }
+              : 0,
+        },
       };
     },
     end(item, monitor) {
@@ -66,7 +66,7 @@ const WordCard: React.FC<IWordCardProps> = props => {
       if (isDragCurrentItem && offsetX < -100) {
         props.onSlideLeft && props.onSlideLeft(props.data);
       }
-    }
+    },
   });
   return (
     <div
