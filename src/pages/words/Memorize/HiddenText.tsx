@@ -8,12 +8,15 @@ import { useToggle } from "react-use";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     icon: {
-      textAlign: "center"
-    }
+      textAlign: "center",
+    },
+    text: {
+      whiteSpace: "pre-wrap",
+    },
   })
 );
 
-const HiddenText: React.FC = props => {
+const HiddenText: React.FC = (props) => {
   const classes = useStyles();
   const [visible, toggleVisible] = useToggle(false);
   return (
@@ -26,7 +29,9 @@ const HiddenText: React.FC = props => {
         )}
       </div>
       {visible ? (
-        <Typography variant="body2">{props.children}</Typography>
+        <Typography variant="body2" className={classes.text}>
+          {props.children}
+        </Typography>
       ) : null}
     </>
   );

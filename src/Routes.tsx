@@ -1,14 +1,15 @@
 import React from "react";
 import {
   HashRouter as Router,
+  Redirect,
   Route,
   Switch,
-  Redirect,
 } from "react-router-dom";
 import styled from "styled-components";
-import PrivateRoute from "./components/PrivateRoute";
 
+import PrivateRoute from "./components/PrivateRoute";
 import { Header, TabBar } from "./components/shell";
+import Home from "./pages/Home";
 import Login from "./pages/user/Login";
 import SignUp from "./pages/user/SignUp";
 import Memorize from "./pages/words/Memorize/Memorize";
@@ -37,6 +38,9 @@ const Routes = () => {
         <PrivateRoute path="/">
           <Container>
             <Header />
+            <Route exact path="/">
+              <Home />
+            </Route>
             <Route path="/words">
               <FlexContent>
                 <Switch>
